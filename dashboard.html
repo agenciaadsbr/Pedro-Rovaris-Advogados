@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leads — Pedro Rovaris</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#0A0A0A;--card:#171717;--line:#262626;--text:#F5F5F5;--muted:#A3A3A3;--dim:#737373;--green:#22C55E}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}
+h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.04em}
+.sub{color:var(--muted);margin-top:4px}
+.btn{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:0 14px;min-height:36px;font:inherit;font-size:12px;font-weight:600;letter-spacing:.06em;cursor:pointer}
+.btn:hover{border-color:#404040;background:#1f1f1f}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.card-h h2{margin:0;font-size:14px;font-weight:600}
+.range{display:flex;gap:8px;align-items:center;color:var(--dim);font-size:11px;letter-spacing:.06em}
+.range input{background:#0F0F0F;border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font:inherit;font-size:12px;color-scheme:dark}
+.chart{position:relative;height:280px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:12px}
+.legend i{display:inline-block;width:10px;height:2px;margin-right:6px;vertical-align:middle}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi span{color:var(--dim);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.kpi b{display:block;font-size:24px;font-weight:700;margin-top:4px}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{text-align:left;color:var(--dim);font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:10px 12px;border-bottom:1px solid var(--line)}
+td{padding:12px;border-bottom:1px solid #1f1f1f;color:var(--text);white-space:nowrap}
+td.m{color:var(--muted)}
+tr:last-child td{border-bottom:0}
+.empty{color:var(--dim);text-align:center;padding:28px}
+.wa{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:5px 10px;color:var(--text);text-decoration:none;font-size:12px}
+.wa:hover{border-color:var(--green);color:var(--green)}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#262626;color:var(--muted);font-size:11px}
+/* login */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login form{width:100%;max-width:360px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.login h1{font-size:16px}
+.login label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.login input{background:#0F0F0F;border:1px solid var(--line);color:var(--text);border-radius:8px;min-height:42px;padding:0 12px;font:inherit}
+.login button{min-height:42px;border:0;border-radius:8px;background:#F5F5F5;color:#0A0A0A;font:inherit;font-weight:700;cursor:pointer}
+.err{color:#F87171;font-size:12px;min-height:18px;margin:0}
+[hidden]{display:none !important}
+@media (max-width:640px){.kpis{grid-template-columns:minmax(0,1fr)}.top{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<section id="login" class="login" hidden>
+<form id="login-form">
+<h1>LEADS — PEDRO ROVARIS</h1>
+<label>Usuário<input id="u" autocomplete="username" required></label>
+<label>Senha<input id="p" type="password" autocomplete="current-password" required></label>
+<p id="login-err" class="err" role="alert"></p>
+<button type="submit">Entrar</button>
+</form>
+</section>
+
+<div id="app" class="wrap" hidden>
+<div class="top">
+<div>
+<h1>LEADS — PEDRO ROVARIS</h1>
+<div class="sub" id="total">Carregando…</div>
+</div>
+<button class="btn" id="logout" type="button">SAIR</button>
+</div>
+
+<div class="kpis">
+<div class="kpi"><span>Visitas no período</span><b id="k-v">0</b></div>
+<div class="kpi"><span>Leads no período</span><b id="k-l">0</b></div>
+<div class="kpi"><span>Conversão</span><b id="k-c">0%</b></div>
+</div>
+
+<div class="card">
+<div class="card-h">
+<h2>Evolução diária</h2>
+<div class="range"><span>DE</span><input type="date" id="de"><span>ATÉ</span><input type="date" id="ate"></div>
+</div>
+<div class="chart"><canvas id="chart" aria-label="Gráfico de visitas, cadastros e conversão por dia" role="img"></canvas></div>
+<div class="legend"><span><i style="background:#A3A3A3"></i>Visitas</span><span><i style="background:#22C55E"></i>Cadastros</span><span><i style="background:#60A5FA"></i>Taxa de conversão (%)</span></div>
+</div>
+
+<div class="card">
+<div class="card-h"><h2>Conversão por LP</h2></div>
+<div class="tbl"><table><thead><tr><th>LP</th><th>Visitas</th><th>Leads</th><th>Conv.</th></tr></thead><tbody id="t-lp"></tbody></table></div>
+</div>
+
+<div class="card">
+<div class="card-h"><h2>Leads</h2></div>
+<div class="tbl"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Área</th><th>Origem</th><th>Data</th><th>Ação</th></tr></thead><tbody id="t-leads"></tbody></table></div>
+</div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function () {
+  var C = window.PR_CONFIG;
+  var USERS = { admin: 'admin@pedro-rovaris.adsbr.internal' };
+  var client = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+  var $ = function (id) { return document.getElementById(id); };
+  var visits = [], leads = [], chart;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function day(d) { var x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }
+  function fmtPhone(d) { d = String(d || '').replace(/\D/g, ''); if (d.length === 11) return '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7); if (d.length === 10) return '(' + d.slice(0, 2) + ') ' + d.slice(2, 6) + '-' + d.slice(6); return d; }
+  function fmtDate(d) { return new Date(d).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+
+  async function fetchAll(table, cols) {
+    var out = [], from = 0, size = 1000;
+    while (true) {
+      var r = await client.from(table).select(cols).eq('site', C.SITE).order('created_at', { ascending: true }).range(from, from + size - 1);
+      if (r.error) throw r.error;
+      out = out.concat(r.data);
+      if (r.data.length < size) break;
+      from += size;
+    }
+    return out;
+  }
+
+  function inRange(row) {
+    var d = day(row.created_at);
+    return (!$('de').value || d >= $('de').value) && (!$('ate').value || d <= $('ate').value);
+  }
+
+  function render() {
+    var v = visits.filter(inRange), l = leads.filter(inRange);
+    $('total').textContent = leads.length + (leads.length === 1 ? ' lead no total' : ' leads no total');
+    $('k-v').textContent = v.length;
+    $('k-l').textContent = l.length;
+    $('k-c').textContent = v.length ? (l.length / v.length * 100).toFixed(1).replace('.', ',') + '%' : '0%';
+
+    /* série diária */
+    var start = $('de').value || (visits[0] && day(visits[0].created_at)) || day(Date.now());
+    var end = $('ate').value || day(Date.now());
+    var days = [], cur = new Date(start + 'T12:00:00'), last = new Date(end + 'T12:00:00');
+    while (cur <= last && days.length < 400) { days.push(day(cur)); cur.setDate(cur.getDate() + 1); }
+    var vc = {}, lc = {};
+    v.forEach(function (r) { var k = day(r.created_at); vc[k] = (vc[k] || 0) + 1; });
+    l.forEach(function (r) { var k = day(r.created_at); lc[k] = (lc[k] || 0) + 1; });
+    var labels = days.map(function (d) { return d.slice(8, 10) + '/' + d.slice(5, 7); });
+    var dv = days.map(function (d) { return vc[d] || 0; });
+    var dl = days.map(function (d) { return lc[d] || 0; });
+    var dc = days.map(function (d, i) { return dv[i] ? +(dl[i] / dv[i] * 100).toFixed(1) : 0; });
+    var data = { labels: labels, datasets: [
+      { label: 'Visitas', data: dv, borderColor: '#A3A3A3', backgroundColor: '#A3A3A3', tension: .3, pointRadius: 2, yAxisID: 'y' },
+      { label: 'Cadastros', data: dl, borderColor: '#22C55E', backgroundColor: '#22C55E', tension: .3, pointRadius: 2, yAxisID: 'y' },
+      { label: 'Conversão %', data: dc, borderColor: '#60A5FA', backgroundColor: '#60A5FA', borderDash: [4, 4], tension: .3, pointRadius: 0, yAxisID: 'y1' }
+    ] };
+    if (chart) { chart.data = data; chart.update(); }
+    else {
+      chart = new Chart($('chart'), { type: 'line', data: data, options: {
+        responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0A0A0A', borderColor: '#262626', borderWidth: 1 } },
+        scales: {
+          x: { grid: { color: '#1f1f1f' }, ticks: { color: '#737373', maxTicksLimit: 12 } },
+          y: { beginAtZero: true, grid: { color: '#1f1f1f' }, ticks: { color: '#737373', precision: 0 } },
+          y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { color: '#737373', callback: function (x) { return x + '%'; } } }
+        } } });
+    }
+
+    /* conversão por LP */
+    $('t-lp').innerHTML = (v.length || l.length)
+      ? '<tr><td>' + esc(C.SITE) + '</td><td>' + v.length + '</td><td>' + l.length + '</td><td>' + (v.length ? (l.length / v.length * 100).toFixed(1).replace('.', ',') + '%' : '0%') + '</td></tr>'
+      : '<tr><td colspan="4" class="empty">Nenhum dado encontrado</td></tr>';
+
+    /* leads */
+    var rows = l.slice().reverse();
+    $('t-leads').innerHTML = rows.length ? rows.map(function (r) {
+      var first = String(r.nome || '').split(' ')[0];
+      var msg = 'Olá, ' + first + '. Recebemos seu contato através da Pedro Rovaris Advogados Associados e gostaria de dar continuidade ao seu atendimento.';
+      var phone = String(r.whatsapp || '').replace(/\D/g, '');
+      var href = 'https://wa.me/55' + phone + '?text=' + encodeURIComponent(msg);
+      return '<tr><td>' + esc(r.nome) + '</td><td class="m">' + esc(fmtPhone(r.whatsapp)) + '</td><td>' + (r.servico ? '<span class="tag">' + esc(r.servico) + '</span>' : '<span class="tag">Geral</span>') + '</td><td class="m">' + esc(r.origem || '—') + '</td><td class="m">' + esc(fmtDate(r.created_at)) + '</td><td><a class="wa" target="_blank" rel="noopener" href="' + esc(href) + '">WhatsApp</a></td></tr>';
+    }).join('') : '<tr><td colspan="6" class="empty">Nenhum lead encontrado</td></tr>';
+  }
+
+  async function load() {
+    $('total').textContent = 'Carregando…';
+    try {
+      var res = await Promise.all([fetchAll('lp_visits', 'created_at'), fetchAll('lp_leads', 'nome, whatsapp, origem, servico, created_at')]);
+      visits = res[0]; leads = res[1];
+      render();
+    } catch (e) {
+      $('total').textContent = 'Erro ao carregar os dados.';
+    }
+  }
+
+  async function show() {
+    var s = (await client.auth.getSession()).data.session;
+    $('login').hidden = !!s; $('app').hidden = !s;
+    if (s) {
+      var today = new Date(), past = new Date(); past.setDate(today.getDate() - 29);
+      if (!$('de').value) $('de').value = day(past);
+      if (!$('ate').value) $('ate').value = day(today);
+      load();
+    }
+  }
+
+  $('login-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    $('login-err').textContent = '';
+    var u = $('u').value.trim().toLowerCase();
+    var email = USERS[u] || (u.indexOf('@') > 0 ? u : null);
+    if (!email) { $('login-err').textContent = 'Usuário ou senha inválidos.'; return; }
+    var r = await client.auth.signInWithPassword({ email: email, password: $('p').value });
+    if (r.error) { $('login-err').textContent = 'Usuário ou senha inválidos.'; return; }
+    show();
+  });
+  $('logout').addEventListener('click', async function () { await client.auth.signOut(); visits = []; leads = []; show(); });
+  $('de').addEventListener('change', render);
+  $('ate').addEventListener('change', render);
+  show();
+})();
+</script>
+</body>
+</html>

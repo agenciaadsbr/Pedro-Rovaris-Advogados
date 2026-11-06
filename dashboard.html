@@ -92,7 +92,7 @@ tr:last-child td{border-bottom:0}
 
 <div class="card">
 <div class="card-h"><h2>Leads</h2></div>
-<div class="tbl"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Área</th><th>Origem</th><th>Data</th><th>Ação</th></tr></thead><tbody id="t-leads"></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>LP</th><th>Origem</th><th>Data</th><th>Ação</th></tr></thead><tbody id="t-leads"></tbody></table></div>
 </div>
 </div>
 
@@ -105,6 +105,8 @@ tr:last-child td{border-bottom:0}
   var USERS = { admin: 'admin@pedro-rovaris.adsbr.internal' };
   var client = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
   var $ = function (id) { return document.getElementById(id); };
+  var SITES = { 'pedro-rovaris-familia': 'Direito de Família', 'pedro-rovaris-servidor': 'Servidor Público (FGTS/ACT)' };
+  var SITE_KEYS = Object.keys(SITES);
   var visits = [], leads = [], chart;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -115,7 +117,7 @@ tr:last-child td{border-bottom:0}
   async function fetchAll(table, cols) {
     var out = [], from = 0, size = 1000;
     while (true) {
-      var r = await client.from(table).select(cols).eq('site', C.SITE).order('created_at', { ascending: true }).range(from, from + size - 1);
+      var r = await client.from(table).select(cols).in('site', SITE_KEYS).order('created_at', { ascending: true }).range(from, from + size - 1);
       if (r.error) throw r.error;
       out = out.concat(r.data);
       if (r.data.length < size) break;
@@ -166,9 +168,10 @@ tr:last-child td{border-bottom:0}
     }
 
     /* conversão por LP */
-    $('t-lp').innerHTML = (v.length || l.length)
-      ? '<tr><td>' + esc(C.SITE) + '</td><td>' + v.length + '</td><td>' + l.length + '</td><td>' + (v.length ? (l.length / v.length * 100).toFixed(1).replace('.', ',') + '%' : '0%') + '</td></tr>'
-      : '<tr><td colspan="4" class="empty">Nenhum dado encontrado</td></tr>';
+    $('t-lp').innerHTML = (v.length || l.length) ? SITE_KEYS.map(function (k) {
+      var vv = v.filter(function (r) { return r.site === k; }).length, ll = l.filter(function (r) { return r.site === k; }).length;
+      return '<tr><td>' + esc(SITES[k]) + '</td><td>' + vv + '</td><td>' + ll + '</td><td>' + (vv ? (ll / vv * 100).toFixed(1).replace('.', ',') + '%' : '0%') + '</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="empty">Nenhum dado encontrado</td></tr>';
 
     /* leads */
     var rows = l.slice().reverse();
@@ -177,14 +180,14 @@ tr:last-child td{border-bottom:0}
       var msg = 'Olá, ' + first + '. Recebemos seu contato através da Pedro Rovaris Advogados Associados e gostaria de dar continuidade ao seu atendimento.';
       var phone = String(r.whatsapp || '').replace(/\D/g, '');
       var href = 'https://wa.me/55' + phone + '?text=' + encodeURIComponent(msg);
-      return '<tr><td>' + esc(r.nome) + '</td><td class="m">' + esc(fmtPhone(r.whatsapp)) + '</td><td>' + (r.servico ? '<span class="tag">' + esc(r.servico) + '</span>' : '<span class="tag">Geral</span>') + '</td><td class="m">' + esc(r.origem || '—') + '</td><td class="m">' + esc(fmtDate(r.created_at)) + '</td><td><a class="wa" target="_blank" rel="noopener" href="' + esc(href) + '">WhatsApp</a></td></tr>';
+      return '<tr><td>' + esc(r.nome) + '</td><td class="m">' + esc(fmtPhone(r.whatsapp)) + '</td><td>' + '<span class="tag">' + esc(SITES[r.site] || r.servico || 'Geral') + '</span>' + '</td><td class="m">' + esc(r.origem || '—') + '</td><td class="m">' + esc(fmtDate(r.created_at)) + '</td><td><a class="wa" target="_blank" rel="noopener" href="' + esc(href) + '">WhatsApp</a></td></tr>';
     }).join('') : '<tr><td colspan="6" class="empty">Nenhum lead encontrado</td></tr>';
   }
 
   async function load() {
     $('total').textContent = 'Carregando…';
     try {
-      var res = await Promise.all([fetchAll('lp_visits', 'created_at'), fetchAll('lp_leads', 'nome, whatsapp, origem, servico, created_at')]);
+      var res = await Promise.all([fetchAll('lp_visits', 'site, created_at'), fetchAll('lp_leads', 'site, nome, whatsapp, origem, servico, created_at')]);
       visits = res[0]; leads = res[1];
       render();
     } catch (e) {

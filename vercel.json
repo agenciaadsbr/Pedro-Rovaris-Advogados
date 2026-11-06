@@ -3,15 +3,47 @@
   "headers": [
     {
       "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/dashboard",
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/obrigado-(familia|servidor)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/familia",
+      "permanent": false
     },
     {
       "source": "/obrigado",
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+      "destination": "/obrigado-familia",
+      "permanent": false
+    },
+    {
+      "source": "/index.html",
+      "destination": "/familia",
+      "permanent": false
     }
   ]
 }

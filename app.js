@@ -1,7 +1,9 @@
 (function () {
   var C = window.PR_CONFIG;
+  var PAGE = window.PR_PAGE || { site: C.SITE, area: '', obrigado: 'obrigado' };
+  var SITE = PAGE.site;
   var track = window.prTrack || function () {};
-  var area = '';
+  var area = PAGE.area || '';
 
   function sb(table, row) {
     return fetch(C.SUPABASE_URL + '/rest/v1/' + table, {
@@ -34,7 +36,7 @@
 
   /* 1 visita por carregamento */
   try {
-    sb('lp_visits', { site: C.SITE, referrer: document.referrer || null, path: location.pathname + location.search }).catch(function () {});
+    sb('lp_visits', { site: SITE, referrer: document.referrer || null, path: location.pathname + location.search }).catch(function () {});
   } catch (e) {}
 
   /* Menu mobile */
@@ -100,7 +102,7 @@
     var w = whats.value;
 
     /* anti-spam: honeypot ou envio rápido demais */
-    if (honey.value || Date.now() - loadedAt < 1500) { location.href = 'obrigado.html'; return; }
+    if (honey.value || Date.now() - loadedAt < 1500) { location.href = PAGE.obrigado; return; }
     if (n.length < 3) return showErr('Informe seu nome completo.');
     if (!validPhone(w)) return showErr('Informe um WhatsApp válido com DDD, por exemplo (48) 99999-9999.');
 
@@ -117,10 +119,10 @@
     track('generate_lead', { lead_area: area || 'geral', content_category: servico || 'Geral' });
     if (area) track(area === 'familia' ? 'lead_familia' : 'lead_servidor', { lead_area: area });
 
-    var go = function () { location.href = 'obrigado.html'; };
+    var go = function () { location.href = PAGE.obrigado; };
     if (isDup) return go();
     var t = setTimeout(go, 4000);
-    sb('lp_leads', { site: C.SITE, nome: n, whatsapp: digits, origem: origem(), servico: servico })
+    sb('lp_leads', { site: SITE, nome: n, whatsapp: digits, origem: origem(), servico: servico })
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         try { sessionStorage.setItem(dupKey, '1'); } catch (e4) {}

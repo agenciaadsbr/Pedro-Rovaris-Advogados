@@ -32,7 +32,7 @@ small{color:#5A6575;font-size:13px}
 <script src="tracking.js"></script>
 </head>
 <body>
-<header><a href="/"><img src="assets/logo.webp" alt="Pedro Rovaris Advogados Associados" width="640" height="117"></a></header>
+<header><a href="/familia"><img src="assets/logo.webp" alt="Pedro Rovaris Advogados Associados" width="640" height="117"></a></header>
 <main>
 <div class="card" role="status">
 <span class="ok"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
@@ -51,6 +51,7 @@ Ir agora para o WhatsApp
   var C = window.PR_CONFIG, track = window.prTrack || function () {};
   var lead = {};
   try { lead = JSON.parse(sessionStorage.getItem('pr_lead') || '{}'); } catch (e) {}
+  lead.area = 'familia';
   if (lead.nome) document.getElementById('t').textContent = 'Recebemos suas informações, ' + lead.nome + '.';
   var assunto = lead.area === 'familia' ? ' sobre Direito de Família (pensão alimentícia / abandono afetivo)'
     : lead.area === 'servidor' ? ' sobre FGTS / contrato temporário (ACT)' : '';

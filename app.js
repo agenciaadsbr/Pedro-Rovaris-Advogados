@@ -51,7 +51,7 @@
   document.querySelectorAll('[data-close-menu]').forEach(function (el) { el.addEventListener('click', function () { setMenu(false); }); });
 
   /* CTAs: todos levam ao formulário; Família/ACT marcam a área */
-  var positions = { ctaHeader: 'header', ctaHero: 'hero', ctaSteps: 'como_funciona', ctaAbout: 'escritorio', ctaFloat: 'flutuante', presetFamilia: 'secao_familia', presetServidor: 'secao_servidor' };
+  var positions = { ctaHeader: 'header', ctaHero: 'hero', ctaSteps: 'como_funciona', ctaAbout: 'escritorio', ctaFloat: 'flutuante', ctaFaq: 'duvidas', presetFamilia: 'secao_familia', presetServidor: 'secao_servidor' };
   document.querySelectorAll('[data-cta]').forEach(function (el) {
     el.addEventListener('click', function () {
       var k = el.getAttribute('data-cta');
